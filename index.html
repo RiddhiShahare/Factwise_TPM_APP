@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quarantine Center TPM Prototype</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-4 md:p-8">
+    <div class="max-w-6xl mx-auto">
+        <header class="mb-8 border-b pb-4">
+            <h1 class="text-3xl font-bold text-blue-800">Quarantine Facility Manager</h1>
+            <p class="text-gray-600">Prototype for FactWise TPM Assessment - 74 Room Capacity</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-blue-500">
+                <h3 class="text-sm font-semibold text-gray-500 uppercase">Mortality Benchmark</h3>
+                <p class="text-2xl font-bold">15% Max</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-green-500">
+                <h3 class="text-sm font-semibold text-gray-500 uppercase">Success Rate Target</h3>
+                <p class="text-2xl font-bold">85%</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-orange-500">
+                <h3 class="text-sm font-semibold text-gray-500 uppercase">Discharge Rule</h3>
+                <p class="text-2xl font-bold">3 Days No-Fever</p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Room No.</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nurse: Temp Log</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Doctor: Visit</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Admin: Discharge Status</th>
+                    </tr>
+                </thead>
+                <tbody id="patientList" class="bg-white divide-y divide-gray-200">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const patientTable = document.getElementById('patientList');
+        
+        // Generate 74 patients to match facility occupancy 
+        for (let i = 1; i <= 74; i++) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Room ${i}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div class="flex items-center space-x-2">
+                        <input type="number" step="0.1" id="temp-${i}" placeholder="°C" class="border rounded px-2 py-1 w-20">
+                        <button onclick="recordTemp(${i})" id="btn-temp-${i}" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Save</button>
+                        <span id="check-temp-${i}" class="hidden text-green-600 font-bold">✓</span>
+                    </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <button onclick="recordVisit(${i})" id="btn-visit-${i}" disabled class="bg-gray-300 text-white px-3 py-1 rounded">Mark Visited</button>
+                    <span id="check-visit-${i}" class="hidden text-green-600 font-bold text-center">✓</span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <span id="status-${i}" class="px-2 py-1 rounded bg-gray-100 text-gray-600">Monitoring</span>
+                </td>
+            `;
+            patientTable.appendChild(row);
+        }
+
+        function recordTemp(id) {
+            const val = document.getElementById(`temp-${id}`).value;
+            if (val) {
+                // Logic: Temperature recorded [cite: 30]
+                document.getElementById(`btn-temp-${id}`).classList.add('hidden');
+                document.getElementById(`temp-${id}`).disabled = true;
+                document.getElementById(`check-temp-${id}`).classList.remove('hidden');
+                
+                // Logic Constraint: Enable doctor visit only after temperature is taken [cite: 13]
+                const visitBtn = document.getElementById(`btn-visit-${id}`);
+                visitBtn.disabled = false;
+                visitBtn.classList.replace('bg-gray-300', 'bg-indigo-600');
+
+                // Discharge Logic: If temp < 37.5 for demonstration
+                if (val < 37.5) {
+                    document.getElementById(`status-${id}`).innerText = "Day 1 Clear";
+                    document.getElementById(`status-${id}`).classList.replace('bg-gray-100', 'bg-yellow-100');
+                }
+            }
+        }
+
+        function recordVisit(id) {
+            document.getElementById(`btn-visit-${id}`).classList.add('hidden');
+            document.getElementById(`check-visit-${id}`).classList.remove('hidden');
+            // Successfully coordinates workflow between nurse and doctor [cite: 9]
+        }
+    </script>
+</body>
+</html>
